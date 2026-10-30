@@ -1,0 +1,49 @@
+{
+  "name": "chat-api",
+  "version": "1.0.0",
+  "description": "Chat backend: users & chats in MySQL, messages & read receipts in Firebase Firestore",
+  "main": "dist/server.js",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node dist/server.js",
+    "typecheck": "tsc --noEmit",
+    "migrate": "tsx src/database/migrate.ts",
+    "seed": "tsx src/database/seeders/seeder.ts",
+    "test": "vitest run",
+    "test:emulator": "firebase emulators:exec --only firestore --project demo-chat-api \"vitest run\""
+  },
+  "author": "Sunny",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.9",
+    "express": "^5.3.0",
+    "firebase-admin": "^14.5.0",
+    "helmet": "^8.3.0",
+    "mysql2": "^3.24.6",
+    "sequelize": "^6.37.8",
+    "zod": "^4.6.7"
+  },
+  "overrides": {
+    "sequelize": {
+      "uuid": "^11.1.1"
+    }
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.6.6",
+    "@types/supertest": "^7.2.1",
+    "mysql-memory-server": "^1.18.0",
+    "supertest": "^7.3.1",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  }
+}

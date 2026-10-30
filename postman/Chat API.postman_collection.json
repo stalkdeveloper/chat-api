@@ -1,0 +1,278 @@
+{
+  "info": {
+    "_postman_id": "b62bbaf0-bcd1-4d55-ae93-2a277e77ce84",
+    "name": "Chat API",
+    "description": "Chat backend collection. Start the API and configure userAId/userBId with existing MySQL user IDs before running the requests. Create Chat saves chatId; Send Message saves messageId for later requests.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "userAId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "userBId",
+      "value": "2",
+      "type": "string"
+    },
+    {
+      "key": "chatId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "messageId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "messageText",
+      "value": "Hello from Postman",
+      "type": "string"
+    },
+    {
+      "key": "messageLimit",
+      "value": "50",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/health",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "health"
+          ]
+        },
+        "description": "Check that the API process is running."
+      }
+    },
+    {
+      "name": "Create or Get Chat",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Chat created or returned', function () {",
+              "    pm.response.to.have.status(200);",
+              "    const body = pm.response.json();",
+              "    pm.expect(body.chatId).to.exist;",
+              "    pm.collectionVariables.set('chatId', String(body.chatId));",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userAId\": \"{{userAId}}\",\n  \"userBId\": \"{{userBId}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/chat/create",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "chat",
+            "create"
+          ]
+        },
+        "description": "Creates a direct chat if one does not already exist. Saves the response chatId to collection variables."
+      }
+    },
+    {
+      "name": "Send Message",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Message sent', function () {",
+              "    pm.response.to.have.status(201);",
+              "    const body = pm.response.json();",
+              "    pm.expect(body.message.id).to.exist;",
+              "    pm.collectionVariables.set('messageId', String(body.message.id));",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"senderId\": \"{{userAId}}\",\n  \"text\": \"{{messageText}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/chat/{{chatId}}/message/send",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "chat",
+            "{{chatId}}",
+            "message",
+            "send"
+          ]
+        },
+        "description": "Sends a message as userAId and saves the returned Firestore message ID."
+      }
+    },
+    {
+      "name": "Get Messages",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/chat/{{chatId}}/messages?userId={{userAId}}&limit={{messageLimit}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "chat",
+            "{{chatId}}",
+            "messages"
+          ],
+          "query": [
+            {
+              "key": "userId",
+              "value": "{{userAId}}"
+            },
+            {
+              "key": "limit",
+              "value": "{{messageLimit}}"
+            }
+          ]
+        },
+        "description": "Gets the most recent messages in chronological order. userId must be a chat member."
+      }
+    },
+    {
+      "name": "Mark Message Read",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": \"{{userBId}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/chat/{{chatId}}/message/{{messageId}}/read",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "chat",
+            "{{chatId}}",
+            "message",
+            "{{messageId}}",
+            "read"
+          ]
+        },
+        "description": "Marks the message sent by userAId as read by userBId."
+      }
+    },
+    {
+      "name": "Update Last Seen",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": \"{{userBId}}\",\n  \"messageId\": \"{{messageId}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/chat/{{chatId}}/lastseen",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "chat",
+            "{{chatId}}",
+            "lastseen"
+          ]
+        },
+        "description": "Updates userBId's last-seen message in this chat."
+      }
+    },
+    {
+      "name": "List User Chats",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/user/{{userAId}}/chats",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "user",
+            "{{userAId}}",
+            "chats"
+          ]
+        },
+        "description": "Lists chats and member IDs for userAId."
+      }
+    }
+  ]
+}
