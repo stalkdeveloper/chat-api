@@ -162,6 +162,7 @@ out
 dist/
 
 # Firebase service account keys
+secrets/
 serviceAccount*.json
 *-firebase-adminsdk-*.json
 firebase-debug.log
